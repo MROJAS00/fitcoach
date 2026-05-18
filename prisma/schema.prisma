@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  TRAINER
+  CLIENT
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum MuscleGroup {
+  CHEST
+  BACK
+  SHOULDERS
+  BICEPS
+  TRICEPS
+  QUADRICEPS
+  HAMSTRINGS
+  GLUTES
+  CALVES
+  CORE
+  FULL_BODY
+}
+
+enum ExerciseCategory {
+  COMPOUND
+  ISOLATION
+  CARDIO
+  MOBILITY
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  passwordHash String
+  role         Role       @default(CLIENT)
+  status       UserStatus @default(PENDING)
+  createdAt    DateTime   @default(now())
+
+  assignedRoutine Routine?     @relation("ClientRoutine")
+  workoutLogs     WorkoutLog[]
+  bodyMetrics     BodyMetric[]
+  createdRoutines Routine[]    @relation("TrainerRoutines")
+}
+
+model Exercise {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  muscleGroup MuscleGroup
+  category    ExerciseCategory
+  description String?
+
+  routineExercises  RoutineExercise[]
+  overrideExercises OverrideExercise[]
+  workoutSets       WorkoutSet[]
+}
+
+model Routine {
+  id        String   @id @default(cuid())
+  name      String
+  clientId  String   @unique
+  trainerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client    User              @relation("ClientRoutine", fields: [clientId], references: [id])
+  trainer   User              @relation("TrainerRoutines", fields: [trainerId], references: [id])
+  days      RoutineDay[]
+  overrides RoutineOverride[]
+}
+
+model RoutineDay {
+  id        String    @id @default(cuid())
+  routineId String
+  dayOfWeek DayOfWeek
+  label     String
+
+  routine   Routine           @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  exercises RoutineExercise[]
+}
+
+model RoutineExercise {
+  id           String  @id @default(cuid())
+  routineDayId String
+  exerciseId   String
+  order        Int
+  sets         Int
+  reps         String
+  weight       String?
+  notes        String?
+
+  routineDay RoutineDay @relation(fields: [routineDayId], references: [id], onDelete: Cascade)
+  exercise   Exercise   @relation(fields: [exerciseId], references: [id])
+}
+
+model RoutineOverride {
+  id        String   @id @default(cuid())
+  routineId String
+  date      DateTime @db.Date
+  label     String
+
+  routine   Routine            @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  exercises OverrideExercise[]
+}
+
+model OverrideExercise {
+  id         String  @id @default(cuid())
+  overrideId String
+  exerciseId String
+  order      Int
+  sets       Int
+  reps       String
+  weight     String?
+  notes      String?
+
+  override RoutineOverride @relation(fields: [overrideId], references: [id], onDelete: Cascade)
+  exercise Exercise        @relation(fields: [exerciseId], references: [id])
+}
+
+model WorkoutLog {
+  id         String    @id @default(cuid())
+  clientId   String
+  date       DateTime  @db.Date
+  completed  Boolean   @default(false)
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  client User         @relation(fields: [clientId], references: [id])
+  sets   WorkoutSet[]
+
+  @@unique([clientId, date])
+}
+
+model WorkoutSet {
+  id           String  @id @default(cuid())
+  workoutLogId String
+  exerciseId   String
+  setNumber    Int
+  weight       Float?
+  reps         Int?
+  completed    Boolean @default(false)
+  notes        String?
+
+  workoutLog WorkoutLog @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  exercise   Exercise   @relation(fields: [exerciseId], references: [id])
+}
+
+model BodyMetric {
+  id         String   @id @default(cuid())
+  clientId   String
+  date       DateTime @db.Date
+  weight     Float?
+  bodyFat    Float?
+  chest      Float?
+  waist      Float?
+  hips       Float?
+  leftArm    Float?
+  rightArm   Float?
+  leftThigh  Float?
+  rightThigh Float?
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  client User @relation(fields: [clientId], references: [id])
+
+  @@unique([clientId, date])
+}
