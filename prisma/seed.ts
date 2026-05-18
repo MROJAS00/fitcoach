@@ -145,7 +145,7 @@ const exercises = [
   { name: 'Rotación Torácica', muscleGroup: MuscleGroup.BACK, category: ExerciseCategory.MOBILITY },
   { name: 'Hip Flexor Stretch', muscleGroup: MuscleGroup.FULL_BODY, category: ExerciseCategory.MOBILITY },
   { name: 'Pigeon Pose', muscleGroup: MuscleGroup.GLUTES, category: ExerciseCategory.MOBILITY },
-  { name: 'World's Greatest Stretch', muscleGroup: MuscleGroup.FULL_BODY, category: ExerciseCategory.MOBILITY },
+  { name: "World's Greatest Stretch", muscleGroup: MuscleGroup.FULL_BODY, category: ExerciseCategory.MOBILITY },
   // Additional popular exercises
   { name: 'Press Banca con Agarre Cerrado', muscleGroup: MuscleGroup.CHEST, category: ExerciseCategory.COMPOUND },
   { name: 'Flexiones', muscleGroup: MuscleGroup.CHEST, category: ExerciseCategory.COMPOUND },
