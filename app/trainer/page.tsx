@@ -88,7 +88,7 @@ export default async function TrainerPage() {
           <div className="divide-y divide-[#2a2a2a]">
             {active.map(client => (
               <div key={client.id} className="px-5 py-3 flex items-center justify-between">
-                <div className="flex-1 min-w-0">
+                <Link href={`/trainer/clients/${client.id}`} className="flex-1 min-w-0 hover:opacity-80 transition-opacity">
                   <p className="text-sm font-medium text-[#f0f0f0]">{client.name}</p>
                   <p className="text-xs text-[#6b7280]">{client.email}</p>
                   {client.assignedRoutine ? (
@@ -96,7 +96,7 @@ export default async function TrainerPage() {
                   ) : (
                     <p className="text-xs text-amber-400 mt-0.5">Sin rutina asignada</p>
                   )}
-                </div>
+                </Link>
                 <div className="flex items-center gap-2 shrink-0 ml-4">
                   <ClientStatusActions clientId={client.id} currentStatus={client.status} compact />
                   <Link
