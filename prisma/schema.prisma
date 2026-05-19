@@ -49,13 +49,14 @@ enum DayOfWeek {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  name         String
-  passwordHash String
-  role         Role       @default(CLIENT)
-  status       UserStatus @default(PENDING)
-  createdAt    DateTime   @default(now())
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String
+  passwordHash  String
+  role          Role       @default(CLIENT)
+  status        UserStatus @default(PENDING)
+  createdAt     DateTime   @default(now())
+  trainerNotes  String?
 
   assignedRoutine Routine?     @relation("ClientRoutine")
   workoutLogs     WorkoutLog[]
