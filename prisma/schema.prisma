@@ -61,6 +61,7 @@ model User {
   assignedRoutine Routine?     @relation("ClientRoutine")
   workoutLogs     WorkoutLog[]
   bodyMetrics     BodyMetric[]
+  cardioLogs      CardioLog[]
   createdRoutines Routine[]    @relation("TrainerRoutines")
 }
 
@@ -186,4 +187,28 @@ model BodyMetric {
   client User @relation(fields: [clientId], references: [id])
 
   @@unique([clientId, date])
+}
+
+enum CardioType {
+  WALK
+  HIKE
+  RUN
+  BIKE
+  SWIM
+  OTHER
+}
+
+model CardioLog {
+  id        String     @id @default(cuid())
+  clientId  String
+  date      DateTime   @db.Date
+  type      CardioType
+  duration  Int
+  distance  Float?
+  elevation Float?
+  calories  Int?
+  notes     String?
+  createdAt DateTime   @default(now())
+
+  client User @relation(fields: [clientId], references: [id])
 }

@@ -4,10 +4,8 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { formatDate, toISODate, MUSCLE_LABELS } from '@/lib/utils'
+import { formatDate, toISODate } from '@/lib/utils'
 import { ChevronLeft, Dumbbell, TrendingUp, Calendar, ClipboardList } from 'lucide-react'
-import { ClientAnalytics } from './ClientAnalytics'
-import { ClientEvolutionCharts } from './ClientEvolutionCharts'
 import { ClientTabView } from './ClientTabView'
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -16,7 +14,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   const { id } = await params
 
-  const [client, workoutLogs, metrics, routine] = await Promise.all([
+  const [client, workoutLogs, metrics, routine, cardioLogs] = await Promise.all([
     prisma.user.findUnique({
       where: { id, role: 'CLIENT' },
       select: { id: true, name: true, email: true, status: true, createdAt: true, trainerNotes: true },
@@ -40,6 +38,10 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     prisma.routine.findUnique({
       where: { clientId: id },
       include: { days: { select: { dayOfWeek: true, label: true } } },
+    }),
+    prisma.cardioLog.findMany({
+      where: { clientId: id },
+      orderBy: { date: 'desc' },
     }),
   ])
 
@@ -113,6 +115,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         clientId={id}
         workoutLogs={workoutLogs}
         metrics={metrics}
+        cardioLogs={cardioLogs}
         initialNotes={client.trainerNotes ?? null}
       />
     </div>

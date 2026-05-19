@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
-  LayoutDashboard, Calendar, TrendingUp, Users, Dumbbell, LogOut, Activity
+  LayoutDashboard, Calendar, TrendingUp, Users, Dumbbell, LogOut, Activity, Footprints
 } from 'lucide-react'
 
 interface AppShellProps {
@@ -15,6 +15,7 @@ interface AppShellProps {
 const clientNav = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Inicio' },
   { href: '/calendar', icon: Calendar, label: 'Calendario' },
+  { href: '/cardio', icon: Footprints, label: 'Actividad' },
   { href: '/evolution', icon: TrendingUp, label: 'Evolución' },
 ]
 

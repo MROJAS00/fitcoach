@@ -5,7 +5,8 @@ import { ClientAnalytics } from './ClientAnalytics'
 import { ClientEvolutionCharts } from './ClientEvolutionCharts'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { BarChart2, History, Scale } from 'lucide-react'
+import { BarChart2, History, Scale, Footprints } from 'lucide-react'
+import { CARDIO_TYPES, CardioType, formatDuration } from '@/lib/cardio'
 
 type Exercise = { id: string; name: string; muscleGroup: string }
 type WorkoutSet = {
@@ -19,11 +20,17 @@ type Metric = {
   chest?: number | null; hips?: number | null; leftArm?: number | null; rightArm?: number | null
   leftThigh?: number | null; rightThigh?: number | null; notes?: string | null
 }
+type CardioLog = {
+  id: string; date: Date | string; type: CardioType
+  duration: number; distance: number | null; elevation: number | null
+  calories: number | null; notes: string | null
+}
 
 interface Props {
   clientId: string
   workoutLogs: WorkoutLog[]
   metrics: Metric[]
+  cardioLogs: CardioLog[]
   initialNotes: string | null
 }
 
@@ -40,11 +47,12 @@ const METRIC_NAMES: Record<string, string> = {
 const TABS = [
   { key: 'analytics', label: 'Análisis', icon: BarChart2 },
   { key: 'history', label: 'Historial', icon: History },
+  { key: 'cardio', label: 'Actividad', icon: Footprints },
   { key: 'metrics', label: 'Medidas', icon: Scale },
 ]
 
-export function ClientTabView({ clientId, workoutLogs, metrics, initialNotes }: Props) {
-  const [tab, setTab] = useState<'analytics' | 'history' | 'metrics'>('analytics')
+export function ClientTabView({ clientId, workoutLogs, metrics, cardioLogs, initialNotes }: Props) {
+  const [tab, setTab] = useState<'analytics' | 'history' | 'cardio' | 'metrics'>('analytics')
 
   return (
     <div>
@@ -179,6 +187,66 @@ export function ClientTabView({ clientId, workoutLogs, metrics, initialNotes }: 
                 </tbody>
               </table>
             </div>
+          )}
+        </Card>
+      )}
+
+      {/* Cardio tab */}
+      {tab === 'cardio' && (
+        <Card>
+          <CardHeader>
+            <p className="font-semibold text-[#f0f0f0]">Actividad — caminatas y senderismo</p>
+          </CardHeader>
+          {cardioLogs.length === 0 ? (
+            <CardContent>
+              <p className="text-[#6b7280] text-sm text-center py-6">El cliente aún no ha registrado ninguna actividad.</p>
+            </CardContent>
+          ) : (
+            <>
+              {/* Summary */}
+              <div className="px-5 py-3 border-b border-[#2a2a2a] grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-lg font-bold text-[#f0f0f0]">{cardioLogs.length}</p>
+                  <p className="text-xs text-[#6b7280]">Actividades</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-[#f0f0f0]">{formatDuration(cardioLogs.reduce((a, l) => a + l.duration, 0))}</p>
+                  <p className="text-xs text-[#6b7280]">Tiempo total</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-[#f0f0f0]">
+                    {cardioLogs.reduce((a, l) => a + (l.distance ?? 0), 0).toFixed(1)} km
+                  </p>
+                  <p className="text-xs text-[#6b7280]">Distancia total</p>
+                </div>
+              </div>
+              <div className="divide-y divide-[#2a2a2a]">
+                {cardioLogs.map(log => {
+                  const meta = CARDIO_TYPES[log.type]
+                  return (
+                    <div key={log.id} className="px-5 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0"
+                        style={{ backgroundColor: `${meta.color}20` }}>
+                        {meta.emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-[#f0f0f0]">{meta.label}</span>
+                          <span className="text-xs text-[#6b7280]">{formatDate(new Date(toISO(log.date) + 'T12:00:00'))}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-3 mt-0.5">
+                          <span className="text-xs text-[#9ca3af]">⏱ {formatDuration(log.duration)}</span>
+                          {log.distance && <span className="text-xs text-[#9ca3af]">📍 {log.distance} km</span>}
+                          {log.elevation && <span className="text-xs text-[#9ca3af]">⛰ {log.elevation} m</span>}
+                          {log.calories && <span className="text-xs text-[#9ca3af]">🔥 {log.calories} kcal</span>}
+                        </div>
+                        {log.notes && <p className="text-xs text-[#6b7280] mt-0.5 truncate">{log.notes}</p>}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
           )}
         </Card>
       )}
